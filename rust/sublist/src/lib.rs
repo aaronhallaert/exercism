@@ -6,34 +6,14 @@ pub enum Comparison {
     Unequal,
 }
 
-pub fn sublist<T: PartialEq>(_first_list: &[T], _second_list: &[T]) -> Comparison {
-    //"Determine if the first list is equal to, sublist of, superlist of or unequal to the second list."
-
-    let mut second_list_vec = _second_list.to_vec();
-
-    let mut number_removed: usize = 0;
-
-    // iterate over _second_list
-    for i in _first_list {
-
-        if second_list_vec.contains(i) {
-            // remove the element from the first list
-            second_list_vec.retain(|x| x != i);
-            number_removed += 1;
-        } else {
-            // if the element is not in the first list, then the first list is not a sublist of the second list
-            return Comparison::Unequal;
-        }
-    }
-
-    if second_list_vec.is_empty() {
-        if number_removed == _first_list.len() {
-            return Comparison::Equal
-        }
-        else {
-            return Comparison::Sublist
-        }
-    } 
-    else {
+pub fn sublist<T: PartialEq>(first_list: &[T], second_list: &[T]) -> Comparison {
+    use Comparison::*;
+    match (first_list.len(), second_list.len()) {
+        (0, 0) => Equal,
+        (0, _) => Sublist,
+        (_, 0) => Superlist,
+        (m, n) if m > n => if first_list.windows(n).any(|v| v == second_list) {Superlist} else {Unequal},
+        (m, n) if m < n => if second_list.windows(m).any(|v| v == first_list) {Sublist} else {Unequal},
+        (_, _) => if first_list == second_list {Equal} else {Unequal}
     }
 }
