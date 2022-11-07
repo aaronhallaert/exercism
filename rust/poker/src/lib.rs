@@ -409,33 +409,22 @@ impl PartialEq for PokerHand {
 
 pub fn winning_hands<'a>(hands: &[&'a str]) -> Vec<&'a str> {
     // split hands on spaces
-    let mut poker_hands: Vec<PokerHand> = Vec::new();
+    let mut poker_hands: Vec<(PokerHand, &str)> = Vec::new();
     hands.iter().for_each(|hand_str| {
         let hand_arr = hand_str.split(' ').collect::<Vec<&str>>();
-        poker_hands.push(PokerHand::new(&hand_arr));
+        poker_hands.push((PokerHand::new(&hand_arr), *hand_str));
     });
 
-    poker_hands.sort_by(|a, b| b.partial_cmp(a).unwrap());
+    poker_hands.sort_by(|(pk_a, _a), (pk_b, _b)| pk_b.partial_cmp(pk_a).unwrap());
 
-    let first_winning_hand = &poker_hands[0];
+    let (first_winning_hand, _) = &poker_hands[0];
 
     // Can't return these because poker_hands is borrowed here
-    let winnning_poker_hands = poker_hands
+    poker_hands
         .iter()
-        .filter_map(|h| {
-            if h.partial_cmp(first_winning_hand) == Some(Ordering::Equal) {
-                Some(&h.origin[..])
-            } else {
-                None
-            }
-        })
-        .collect::<Vec<&str>>();
-
-    hands
-        .iter()
-        .filter_map(|hand| {
-            if winnning_poker_hands.contains(hand) {
-                Some(*hand)
+        .filter_map(|(poker_hand, origin)| {
+            if poker_hand.partial_cmp(first_winning_hand) == Some(Ordering::Equal) {
+                Some(*origin)
             } else {
                 None
             }
